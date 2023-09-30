@@ -103,10 +103,16 @@ void SL_run(char *input)
 		token = token->next;
 	}
 
+	// SL_token_print_list(first);
+
 	SL_parser_node *root = SL_parser_parse(&first);
 	SL_bytecode *bc = SL_bytecode_new();
+
+	// SL_parser_print_nodes(root, 0);
+
 	SL_parser_node_to_bytecode(bc, root);
-	SL_bytecode_print(bc);
+	// SL_bytecode_print(bc);
+	
 	SL_vm *vm = SL_vm_new(bc);
 	SL_vm_execute(vm);
 	SL_vm_print_stack(vm);

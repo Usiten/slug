@@ -1,15 +1,14 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h> 
 
-#include "tool.h"
 #include "bytecode.h"
+#include "tool.h"
 
 SL_bytecode *SL_bytecode_new(void)
 {
 	SL_bytecode *bc = calloc(1, sizeof(SL_bytecode));
 	SL_ALLOC_CHECK(bc)
-	bc->var_to_addr = SL_hash_map_new();
-	bc->var_data = calloc(64, sizeof(uint64_t));
 	return bc;
 }
 
@@ -53,8 +52,9 @@ void SL_bytecode_write_str(SL_bytecode *bc, char *str)
 {
 	assert(bc != NULL);
 
+	SL_bytecode_write_u64(bc,(uint64_t) strlen(str));
+
 	while (*str) {
-		SL_bytecode_write_u64(bc,(uint64_t) strlen(str));
 		SL_bytecode_write_u8(bc, (uint8_t) *str);
 		str++;
 	}
@@ -70,7 +70,7 @@ char *SL_bytecode_read_str(SL_bytecode *bc, uint64_t addr)
 	char *s = calloc(len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; ++i) {
-		s[i] = (char) SL_bytecode_read_u8(bc, addr + 1 + i);
+		s[i] = (char) SL_bytecode_read_u8(bc, addr + 8 + i);
 	}
 
 	return s;
@@ -126,7 +126,11 @@ void SL_bytecode_print(SL_bytecode *bc)
 	for (size_t i = 0; i < bc->size; ++i)
 	{
 		const uint8_t u = SL_bytecode_read_u8(bc, i);
-		fprintf(stdout, "%02hhx ", u);
+		if (!isalpha(u))
+			fprintf(stdout, "%02hhx ", u);
+		else
+			fprintf(stdout, "%02c ", (char)u);
+
 
 		if ((i + 1) % 8 == 0) {
 			putchar('\n');

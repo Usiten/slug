@@ -80,26 +80,33 @@ SL_parser_node *SL_parse_factor(SL_token **token)
 {
 	TRACE
 	last_expected = "an factor";
+	SL_token **save = token;
 	SL_parser_node *integer = terminal_integer(token);
+	if (integer && !integer->is_token_error)
+		return integer;
 
-	if (!integer || integer->is_token_error)
-	{
-		SL_parser_node *lparen = terminal_lparen(token);
-		if (!lparen || lparen->is_token_error) 
-			return NULL;
-
-		SL_parser_node *expr = SL_parse_expr(token);
-		if (!expr)
-			return NULL;
-
-		SL_parser_node *rparen = terminal_rparen(token);
-		if (!rparen || rparen->is_token_error) 
-			return NULL;
-
-		return expr;
+	token = save;
+	last_expected = "an id";
+	SL_parser_node *id = terminal_identifier(token);
+	if (id && !id->is_token_error) {
+		id->rhs = true;
+		return id;
 	}
 
-	return integer;
+	last_expected = "an expr";
+	token = save;
+	SL_parser_node *lparen = terminal_lparen(token);
+	if (lparen && !lparen->is_token_error) {
+		SL_parser_node *expr = SL_parse_expr(token);
+		if (expr && !expr->is_token_error) {
+			SL_parser_node *rparen = terminal_rparen(token);
+			if (rparen && !rparen->is_token_error) {
+				return expr;
+			}
+		}
+	}
+
+	return NULL;
 }
 
 SL_parser_node *SL_parse_factor_op(SL_token **token)
@@ -184,7 +191,6 @@ SL_parser_node *SL_parse_expr(SL_token **token)
 SL_parser_node *SL_parse_assign(SL_token **token)
 {
 	TRACE
-	last_expected = "an assignment";
 	SL_parser_node *id = terminal_identifier(token);
 	if (!id || id->is_token_error)
 		return NULL;
@@ -206,24 +212,54 @@ SL_parser_node *SL_parse_expr_or_assign(SL_token **token)
 {
 	TRACE
 	SL_token **save = token;
-	SL_parser_node *expr1 = SL_parse_expr(token);
-	if (expr1)
-		return expr1;
-
-	token = save;
 	SL_parser_node *assign = SL_parse_assign(token);
 	if (assign)
 		return assign;
 
+	token = save;
+	SL_parser_node *expr1 = SL_parse_expr(token);
+	if (expr1)
+		return expr1;
+
 	return NULL;
 }
 
-SL_parser_node *SL_parse_exprs(SL_token **token)
+SL_parser_node *SL_parse_linear(SL_token **token)
+{
+	SL_parser_node *assign = terminal_assign(token);
+	if (!assign || assign->is_token_error)
+		return NULL;
+
+	SL_parser_node *expr1 = SL_parse_expr(token);
+	if (expr1)
+		return expr1;
+
+	SL_parser_node *semi1 = terminal_semicolon(token);
+	if (!semi1 || semi1->is_token_error)
+		return NULL;
+
+	return expr1;
+}
+
+SL_parser_node *SL_parse_assign_or_linear(SL_token **token)
+{
+	SL_parser_node *assign1 = SL_parse_assign(token);
+	if (assign1)
+		return assign1;
+
+	SL_parser_node *linear = SL_parse_linear(token);
+	if (linear)
+		return linear;
+
+	return NULL;
+}
+
+SL_parser_node *SL_parse_stmts(SL_token **token)
 {
 	TRACE
-	last_expected = "expressions or assignments";
-	SL_parser_node *expr1 = SL_parse_expr_or_assign(token);
-	if (!expr1)
+	last_expected = "statement";
+	SL_parser_node *assign1 = SL_parse_assign_or_linear(token);
+	if (!assign1)
 		return NULL;
 
 	SL_parser_node *semi1 = terminal_semicolon(token);
@@ -232,24 +268,24 @@ SL_parser_node *SL_parse_exprs(SL_token **token)
 
 	while ((*token)->next)
 	{
-		SL_parser_node *expr2 = SL_parse_expr_or_assign(token);
-		if (!expr2)
+		SL_parser_node *assign2 = SL_parse_assign_or_linear(token);
+		if (!assign2)
 			return NULL;
 
 		SL_parser_node *semi2 = terminal_semicolon(token);
 		if (!semi2 || semi2->is_token_error)
 			return NULL;
 
-		expr1 = SL_parser_node_new(NULL, expr1, expr2);
+		assign1 = SL_parser_node_new(NULL, assign1, assign2);
 	}
 
-	return expr1;
+	return assign1;
 }
 
 SL_parser_node *SL_parser_parse(SL_token **token)
 {
 	TRACE
-	SL_parser_node *node = SL_parse_exprs(token);
+	SL_parser_node *node = SL_parse_stmts(token);
 	if (node == NULL)
 	{
 		fprintf(stderr, "[ERROR] At %s:%llu:%llu: Expected %s, but found '%s' instead.\n", 

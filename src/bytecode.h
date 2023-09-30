@@ -12,9 +12,6 @@ struct SL_bytecode
 {
 	uint8_t		*code;
 	size_t		size;
-	SL_hash_map	*var_to_addr;
-	uint64_t	*var_data;
-	size_t		var_count;
 };
 
 typedef struct SL_bytecode SL_bytecode;

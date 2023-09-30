@@ -6,7 +6,7 @@
 
 void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 {
-	assert(12 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
+	static_assert(12 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
 
 	assert(bc != NULL);
 	assert(root != NULL);
@@ -18,23 +18,19 @@ void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 	}
 
 	if (root->token->type == TOKEN_IDENTIFIER) {
-		uint64_t *var = SL_hash_map_get(bc->var_to_addr, root->token->raw_text);
-		if (var == NULL) {
-			SL_hash_map_insert(bc->var_to_addr, root->token->raw_text, bc->var_count);
-			SL_bytecode_write_u8(bc, OP_PUSH);
-			SL_bytecode_write_u64(bc, bc->var_count);
-			bc->var_count++;
+		if (!root->rhs) {
+			SL_bytecode_write_str(bc, root->token->raw_text);
 		} else {
-			SL_bytecode_write_u8(bc, OP_PUSH);
-			SL_bytecode_write_u64(bc, *var);
+			SL_bytecode_write_u8(bc, OP_PUSH_VAR);
+			SL_bytecode_write_str(bc, root->token->raw_text);
 		}
 		return;
 	}
 
 	if (root->token->type == TOKEN_ASSIGN) {
-		SL_parser_node_to_bytecode(bc, root->left);
 		SL_parser_node_to_bytecode(bc, root->right);
 		SL_bytecode_write_u8(bc, OP_ASSIGN);
+		SL_parser_node_to_bytecode(bc, root->left);
 		return;
 	}
 

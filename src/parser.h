@@ -9,6 +9,7 @@ struct SL_parser_node
 {
 	SL_token	*token;
 	bool		is_token_error;
+	bool		rhs;
 	struct SL_parser_node	*left;
 	struct SL_parser_node	*right;
 };
