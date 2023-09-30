@@ -106,3 +106,15 @@ void SL_bytecode_print(SL_bytecode *bc)
 	putchar('\n');
 	fprintf(stdout, "--------------\n");
 }
+
+void SL_bytecode_dump(SL_bytecode *bc, char *file_name)
+{
+	FILE *f = fopen(file_name, "wb");
+
+	for (size_t i = 0; i < bc->size; ++i) {
+		uint8_t n = bc->data[i];
+		fwrite(&n, 1, 1, f);
+	}
+
+	fclose(f);
+}

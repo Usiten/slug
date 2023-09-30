@@ -28,5 +28,6 @@ uint64_t SL_bytecode_read_u64(SL_bytecode *bc, uint64_t addr);
 
 // IO
 void SL_bytecode_print(SL_bytecode *bc);
+void SL_bytecode_dump(SL_bytecode *bc, char *file_name);
 
 #endif	// SL_BYTECODE_H

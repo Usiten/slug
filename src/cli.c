@@ -1,0 +1,169 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "bytecode.h"
+#include "parser.h"
+#include "lex.h"
+#include "gen.h"
+#include "vm.h"
+#include "cli.h"
+
+enum USAGE {
+	TITLE = 0,
+	COMPILE,
+	EXECUTE,
+	RUN
+};
+
+static const char *usage[] = {
+	[TITLE] 	= "Usage:\n",
+	[COMPILE] 	= "    -c, --compile  `file.sl` [`out.slx`]   Compile `file.sl` to bytecode assembly `file.slx` (or `out.slx` if provided)\n",
+	[EXECUTE] 	= "    -x, --execute  `file.slx`              Execute bytecode assembly `file.slx`\n",
+	[RUN] 		= "    -r, --run  `file.sl`                   Compile and execute `file.sl` without generating bytecode assembly\n",
+	NULL,
+};
+
+void SL_print_usage(void)
+{
+	size_t i = 0;
+
+	while (usage[i] != NULL) {
+		fprintf(stderr, "%s", usage[i]);
+		++i;
+	}
+}
+
+void SL_load_source_from_sl_file(char *file_name, char **buffer)
+{
+	// TODO: Handle errors
+	FILE *f = fopen(file_name, "r");
+	fseek(f, 0L, SEEK_END);
+	size_t file_len = ftell(f);
+	fseek(f, 0L, SEEK_SET);	
+	*buffer = calloc(file_len, sizeof(char));
+	fread(*buffer, sizeof(char), file_len, f);
+	fclose(f);
+}
+
+SL_bytecode *SL_load_bytecode_from_slx_file(char *file_name)
+{
+	// TODO: Handle errors
+	FILE *f = fopen(file_name, "rb");
+	fseek(f, 0L, SEEK_END);
+	size_t file_len = ftell(f);
+	fseek(f, 0L, SEEK_SET);	
+
+	SL_bytecode *bc = SL_bytecode_new();
+	bc->data = calloc(file_len, sizeof(uint8_t));
+	bc->size = file_len;
+	fread(bc->data, sizeof(uint8_t), file_len, f);
+	fclose(f);
+
+	return bc;
+}
+
+void SL_compile(char *input, char *output) 
+{ 
+	char *buffer;
+	SL_load_source_from_sl_file(input, &buffer);
+	SL_token *token = SL_next_token_from_input(&buffer); 
+	SL_token *first = token;
+	while (token->type != TOKEN_EOF)
+	{
+		token->next = SL_next_token_from_input(&buffer);
+		token = token->next;
+	}
+	SL_parser_node *root = SL_parser_parse(&first);
+	SL_bytecode *bc = SL_bytecode_new();
+	SL_parser_node_to_bytecode(bc, root);
+	SL_bytecode_dump(bc, output);
+}
+
+void SL_execute(char *input) 
+{ 
+	SL_bytecode *bc = SL_load_bytecode_from_slx_file(input);
+	SL_vm *vm = SL_vm_new(bc);
+	SL_vm_execute(vm);
+	SL_vm_print_stack(vm);
+	SL_vm_free(&vm);
+}
+
+void SL_run(char *input)
+{
+	char *buffer;
+	SL_load_source_from_sl_file(input, &buffer);
+
+	SL_token *token = SL_next_token_from_input(&buffer); 
+	SL_token *first = token;
+	while (token->type != TOKEN_EOF)
+	{
+		token->next = SL_next_token_from_input(&buffer);
+		token = token->next;
+	}
+	SL_parser_node *root = SL_parser_parse(&first);
+	SL_bytecode *bc = SL_bytecode_new();
+	SL_parser_node_to_bytecode(bc, root);
+	SL_vm *vm = SL_vm_new(bc);
+	SL_vm_execute(vm);
+	SL_vm_print_stack(vm);
+	SL_vm_free(&vm);
+}
+
+int SL_cli_handle(int argc, char** argv)
+{
+	char *input_file = NULL;
+    char *output_file = NULL;
+    
+    char *program = SL_shift_args(&argc, &argv);
+	(void) program;
+    
+    if (argc < 1) {
+        SL_print_usage();
+        exit(1);
+    }
+
+	char *command = argv[0];
+    
+	if (strcmp(command, "-c") == 0 || strcmp(command, "--compile") == 0) {
+        if (argc < 2) {
+            fprintf(stderr, "[ERROR] Missing argument\n%s%s", usage[TITLE], usage[COMPILE]);
+            exit(1);
+        }
+
+        input_file = argv[1];
+
+		if (argv[2] == NULL) {
+			output_file = calloc(strlen(input_file) + 1 + 1, sizeof(char));
+			strcpy(output_file, input_file);
+			output_file[strlen(input_file)] = 'x'; // TODO : add an output file option 
+		}
+		else {
+			output_file = argv[2];
+		}
+
+		SL_compile(input_file, output_file);
+    } 
+	else if (strcmp(command, "-x") == 0 || strcmp(command, "--execute") == 0) {
+        if (argc < 2) {
+            fprintf(stderr, "[ERROR] Missing argument\n%s%s", usage[TITLE], usage[EXECUTE]);
+            exit(1);
+        }
+
+		SL_execute(argv[1]);
+    } 
+	else if (strcmp(command, "-r") == 0 || strcmp(command, "--run") == 0) {
+        if (argc < 2) {
+            fprintf(stderr, "[ERROR] Missing argument\n%s%s", usage[TITLE], usage[RUN]);
+            exit(1);
+        }
+
+		SL_run(argv[1]);
+    } 
+	else {
+        fprintf(stderr, "[ERROR] Unknown command: %s\n", command);
+		SL_print_usage();
+        exit(1);
+    }
+    
+    return 0;
+}
