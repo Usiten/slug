@@ -1,3 +1,7 @@
+nobuild
+slug
+.vscode
+
 # Prerequisites
 *.d
 
