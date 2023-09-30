@@ -1,21 +1,10 @@
 #include <stdio.h>
 
-#define SL_TOOL_IMPLEMENTATION
 #include "tool.h"
-
-#define SL_BYTECODE_IMPLEMENTATION
 #include "bytecode.h"
-
-#define SL_VM_IMPLEMETATION
 #include "vm.h"
-
-#define SL_LEX_IMPLEMENTATION
 #include "lex.h"
-
-#define SL_PARSER_IMPLEMENTATION
 #include "parser.h"
-
-#define SL_GEN_IMPLEMENTATION
 #include "gen.h"
 
 int main(int argc, char **argv)
