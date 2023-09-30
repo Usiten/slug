@@ -54,9 +54,9 @@ SL_bytecode *SL_load_bytecode_from_slx_file(char *file_name)
 	fseek(f, 0L, SEEK_SET);	
 
 	SL_bytecode *bc = SL_bytecode_new();
-	bc->data = calloc(file_len, sizeof(uint8_t));
+	bc->code = calloc(file_len, sizeof(uint8_t));
 	bc->size = file_len;
-	fread(bc->data, sizeof(uint8_t), file_len, f);
+	fread(bc->code, sizeof(uint8_t), file_len, f);
 	fclose(f);
 
 	return bc;
@@ -70,6 +70,7 @@ void SL_compile(char *input, char *output)
 	SL_token *first = token;
 	while (token->type != TOKEN_EOF)
 	{
+		token->file = input;
 		token->next = SL_next_token_from_input(&buffer);
 		token = token->next;
 	}
@@ -97,15 +98,19 @@ void SL_run(char *input)
 	SL_token *first = token;
 	while (token->type != TOKEN_EOF)
 	{
+		token->file = input;
 		token->next = SL_next_token_from_input(&buffer);
 		token = token->next;
 	}
+
 	SL_parser_node *root = SL_parser_parse(&first);
 	SL_bytecode *bc = SL_bytecode_new();
 	SL_parser_node_to_bytecode(bc, root);
+	SL_bytecode_print(bc);
 	SL_vm *vm = SL_vm_new(bc);
 	SL_vm_execute(vm);
 	SL_vm_print_stack(vm);
+	SL_vm_print_vars(vm);
 	SL_vm_free(&vm);
 }
 

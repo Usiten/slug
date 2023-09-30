@@ -1,22 +1,33 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "tool.h"
 
 char *SL_shift_args(int *argc, char ***argv)
 {
-    assert(*argc > 0);
-    char *result = **argv;
-    (*argv) += 1;
-    (*argc) -= 1;
-    return result;
+	assert(*argc > 0);
+	char *result = **argv;
+	(*argv) += 1;
+	(*argc) -= 1;
+	return result;
 }
 
 char *SL_strndup(const char *s1, size_t n)
 {
-    char *dup = malloc(n+1);
-    memcpy(dup, s1, n);
-    dup[n] = '\0';
+	char *dup = malloc(n + 1);
+	memcpy(dup, s1, n);
+	dup[n] = '\0';
 
-    return dup;
+	return dup;
 };
+
+char *SL_strdup(const char *s1)
+{
+	char *str;
+	size_t size = strlen(s1) + 1;
+	str = malloc(size);
+	SL_ALLOC_CHECK(str)
+	memcpy(str, s1, size);
+	return str;
+}

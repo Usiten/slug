@@ -2,7 +2,7 @@
 #include "src/nobuild.h"
 
 #define OUT_BIN "slug"
-#define SOURCE_FILES "src/main.c", "src/bytecode.c", "src/lex.c", "src/parser.c", "src/vm.c", "src/gen.c", "src/tool.c", "src/cli.c"
+#define SOURCE_FILES "src/main.c", "src/bytecode.c", "src/lex.c", "src/parser.c", "src/vm.c", "src/gen.c", "src/tool.c", "src/cli.c", "src/map.c"
 #define CFLAGS "-Wall", "-Wextra", "-O0", "-std=c11", "-Wformat=0"
 
 static void build(void)

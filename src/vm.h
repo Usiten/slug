@@ -11,6 +11,7 @@ enum SL_opcode
 	OP_SUB,
 	OP_MUL,
 	OP_DIV,
+	OP_ASSIGN,
 	__OP_COUNT__
 };
 
@@ -38,6 +39,7 @@ uint64_t SL_vm_read_u64(SL_vm *vm);
 void SL_vm_push(SL_vm *vm, uint64_t u);
 uint64_t SL_vm_pop(SL_vm *vm);
 void SL_vm_print_stack(SL_vm *vm);
+void SL_vm_print_vars(SL_vm *vm);
 
 // Execution
 void SL_vm_execute(SL_vm *vm);

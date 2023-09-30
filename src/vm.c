@@ -32,7 +32,7 @@ SL_opcode SL_vm_read_opcode(SL_vm *vm)
 {
 	assert(vm != NULL);
 	assert(vm->bytecode != NULL);
-	assert(vm->bytecode->data != NULL);
+	assert(vm->bytecode->code != NULL);
 	assert(vm->bytecode->size - (size_t)vm->ip >= 1);
 
 	SL_opcode opcode = SL_bytecode_read_u8(vm->bytecode, vm->ip);
@@ -44,7 +44,7 @@ uint64_t SL_vm_read_u64(SL_vm *vm)
 {
 	assert(vm != NULL);
 	assert(vm->bytecode != NULL);
-	assert(vm->bytecode->data != NULL);
+	assert(vm->bytecode->code != NULL);
 	assert(vm->bytecode->size - (size_t)vm->ip >= 8);
 
 	uint64_t u = SL_bytecode_read_u64(vm->bytecode, vm->ip);
@@ -98,13 +98,26 @@ void SL_vm_print_stack(SL_vm *vm)
 	printf("---------------\n");
 }
 
+void SL_vm_print_vars(SL_vm *vm)
+{
+	assert(vm != NULL);
+	assert(vm->bytecode != NULL);
+
+	printf("-- Var Data --\n");
+	for (size_t i = 0; i < vm->bytecode->var_count; ++i) {
+		printf("0x%02X  : %llu\n", i, vm->bytecode->var_data[i]);
+	}
+
+	printf("---------------\n");
+}
+
 void SL_vm_execute(SL_vm *vm)
 {
 	assert(vm != NULL);
 	assert(vm->stack != NULL);
 	assert(vm->bytecode != NULL);
 
-	assert(5 == __OP_COUNT__); // If this assertion fail, implement the missing operation and increment it
+	static_assert(6 == __OP_COUNT__, "Not all opcode are implemented"); // If this assertion fail, implement the missing operation and increment it
 
 	while ((size_t)vm->ip < vm->bytecode->size)
 	{
@@ -141,6 +154,13 @@ void SL_vm_execute(SL_vm *vm)
 			uint64_t u = SL_vm_pop(vm);
 			uint64_t v = SL_vm_pop(vm);
 			SL_vm_push(vm, v / u);
+			continue;
+		}
+
+		if (opcode == OP_ASSIGN) {
+			uint64_t v = SL_vm_pop(vm);
+			uint64_t var_addr = SL_vm_pop(vm);
+			vm->bytecode->var_data[var_addr] = v;
 			continue;
 		}
 

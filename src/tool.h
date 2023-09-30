@@ -10,6 +10,7 @@
 	}
 
 char *SL_shift_args(int *argc, char ***argv);
+char *SL_strdup(const char *s1);
 char *SL_strndup(const char *s1, size_t n);
 
 #endif // SL_TOOL_H

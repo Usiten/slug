@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "tool.h"
 #include "bytecode.h"
@@ -7,6 +8,8 @@ SL_bytecode *SL_bytecode_new(void)
 {
 	SL_bytecode *bc = calloc(1, sizeof(SL_bytecode));
 	SL_ALLOC_CHECK(bc)
+	bc->var_to_addr = SL_hash_map_new();
+	bc->var_data = calloc(64, sizeof(uint64_t));
 	return bc;
 }
 
@@ -14,8 +17,8 @@ void SL_bytecode_free(SL_bytecode **bc)
 {
 	assert(*bc != NULL);
 
-	free((*bc)->data);
-	(*bc)->data = NULL;
+	free((*bc)->code);
+	(*bc)->code = NULL;
 
 	free(*bc);
 	*bc = NULL;
@@ -25,9 +28,9 @@ void SL_bytecode_write_u8(SL_bytecode * bc, uint8_t u)
 {
 	assert(bc != NULL);
 
-	bc->data = realloc(bc->data, bc->size + 1);
-	SL_ALLOC_CHECK(bc->data)
-	bc->data[bc->size] = u;
+	bc->code = realloc(bc->code, bc->size + 1);
+	SL_ALLOC_CHECK(bc->code)
+	bc->code[bc->size] = u;
 	bc->size++;
 }
 
@@ -46,20 +49,47 @@ void SL_bytecode_write_u64(SL_bytecode *bc, uint64_t u)
 	SL_bytecode_write_u8(bc, (u & 0xFF) >> 0 * 8);
 }
 
+void SL_bytecode_write_str(SL_bytecode *bc, char *str)
+{
+	assert(bc != NULL);
+
+	while (*str) {
+		SL_bytecode_write_u64(bc,(uint64_t) strlen(str));
+		SL_bytecode_write_u8(bc, (uint8_t) *str);
+		str++;
+	}
+
+	SL_bytecode_write_u8(bc, (uint8_t) '\0');
+}
+
+char *SL_bytecode_read_str(SL_bytecode *bc, uint64_t addr)
+{
+	assert(bc != NULL);
+
+	uint64_t len = SL_bytecode_read_u64(bc, addr);
+	char *s = calloc(len + 1, sizeof(char));
+
+	for (size_t i = 0; i < len; ++i) {
+		s[i] = (char) SL_bytecode_read_u8(bc, addr + 1 + i);
+	}
+
+	return s;
+}
+
 uint8_t SL_bytecode_read_u8(SL_bytecode *bc, uint64_t addr)
 {
 	assert(bc != NULL);
-	assert(bc->data != NULL);
+	assert(bc->code != NULL);
 	assert(bc->size - addr >= 1);
 
-	uint8_t u = bc->data[addr];
+	uint8_t u = bc->code[addr];
 	return u;
 }
 
 uint64_t SL_bytecode_read_u64(SL_bytecode *bc, uint64_t addr)
 {
 	assert(bc != NULL);
-	assert(bc->data != NULL);
+	assert(bc->code != NULL);
 	assert(bc->size >= 8);
 	assert(bc->size - addr >= 8);
 
@@ -89,7 +119,7 @@ uint64_t SL_bytecode_read_u64(SL_bytecode *bc, uint64_t addr)
 void SL_bytecode_print(SL_bytecode *bc)
 {
 	assert(bc != NULL);
-	assert(bc->data != NULL);
+	assert(bc->code != NULL);
 
 	fprintf(stdout, "-- Bytecode --\n");
 
@@ -112,7 +142,7 @@ void SL_bytecode_dump(SL_bytecode *bc, char *file_name)
 	FILE *f = fopen(file_name, "wb");
 
 	for (size_t i = 0; i < bc->size; ++i) {
-		uint8_t n = bc->data[i];
+		uint8_t n = bc->code[i];
 		fwrite(&n, 1, 1, f);
 	}
 
