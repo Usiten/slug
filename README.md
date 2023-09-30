@@ -25,11 +25,11 @@ There is no Windows port, but it should be pretty easy to port with [MinGW-w64](
 $ ./slug -c `file.sl`     # Compile `file.sl` to `file.slx` bytecode assembly
 $ ./slug -x `file.slx`	# Execute `file.slx`
 ```
-Or, faster and if you don't need the assembly:
+Or, one-liner, if you don't need the assembly:
 ```sh
 $ ./slug -r `file.sl`     # Compile and run `file.sl` without saving a bytecode assembly file
 ```
-For more command, you can always just display the usage:"
+For more command, you can always just display the usage:
 ```sh
 $ ./slug
 Usage:
@@ -38,4 +38,4 @@ Usage:
     -r, --run  `file.sl`                   Compile and execute `file.sl` without generating bytecode assembly
 ```
 
-Expect a lot of crash and error.
+Expect lot of crashes and errors.
