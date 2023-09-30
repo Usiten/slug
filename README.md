@@ -4,6 +4,8 @@ A (very early toy) bytecode assembler and interpreter.
 As of today, it is not event turing complete.
 For now, it doesn't do anything fancy except some very basic math.
 
+It is highly **un**optimized, and leaks memory all over the place.
+
 ## Build
 slug uses a [rewrite](https://github.com/tsoding/musializer/blob/master/src/nob.h) of [tsoding's nobuild](https://github.com/tsoding/nobuild) as a build tool. 
 ```sh

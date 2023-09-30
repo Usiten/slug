@@ -1,0 +1,10 @@
+-- You can play with this in https://bnfplayground.pauliankline.com/
+
+<integer>	::=		[0-9]+
+<factor>	::=		<integer> | "(" <expr> ")"
+<factor_op>	::=		"*" | "/"
+<term>		::=		<factor> (<factor_op> <factor>)*
+<term_op>	::=		"+" | "-"
+<expr>		::=		<term> (<term_op> <term>)*	
+<exprs>		::=		<expr> ";"  (<expr> ";")*	
+<program>	::=		<exprs>
