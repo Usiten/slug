@@ -16,6 +16,8 @@ char *SL_shift_args(int *argc, char ***argv)
 char *SL_strndup(const char *s1, size_t n)
 {
 	char *dup = malloc(n + 1);
+	SL_ALLOC_CHECK(dup)
+	
 	memcpy(dup, s1, n);
 	dup[n] = '\0';
 
@@ -24,10 +26,10 @@ char *SL_strndup(const char *s1, size_t n)
 
 char *SL_strdup(const char *s1)
 {
-	char *str;
-	size_t size = strlen(s1) + 1;
-	str = malloc(size);
+	const size_t size = strlen(s1) + 1;
+	char *str = malloc(size);
 	SL_ALLOC_CHECK(str)
+
 	memcpy(str, s1, size);
 	return str;
 }

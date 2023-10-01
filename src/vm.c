@@ -23,6 +23,10 @@ void SL_vm_free(SL_vm **vm)
 	assert(*vm != NULL);
 
 	SL_bytecode_free(&(*vm)->bytecode);
+	SL_hash_map_free(&(*vm)->var_to_addr);
+
+	free((*vm)->var_data);
+	(*vm)->var_data = NULL;
 
 	free((*vm)->stack);
 	(*vm)->stack = NULL;

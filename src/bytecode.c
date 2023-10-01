@@ -19,6 +19,13 @@ void SL_bytecode_free(SL_bytecode **bc)
 	free((*bc)->code);
 	(*bc)->code = NULL;
 
+	for (size_t i = 0; i < (*bc)->str_count; ++i)
+	{
+		free((*bc)->str_registar[i]);
+	}
+
+	free((*bc)->str_registar);
+
 	free(*bc);
 	*bc = NULL;
 }
@@ -68,6 +75,10 @@ char *SL_bytecode_read_str(SL_bytecode *bc, uint64_t addr)
 
 	uint64_t len = SL_bytecode_read_u64(bc, addr);
 	char *s = calloc(len + 1, sizeof(char));
+
+	bc->str_registar = realloc(bc->str_registar, (bc->str_count + 1) * sizeof(char*));
+	bc->str_registar[bc->str_count] = s;
+	bc->str_count++;
 
 	for (size_t i = 0; i < len; ++i) {
 		s[i] = (char) SL_bytecode_read_u8(bc, addr + 8 + i);

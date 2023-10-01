@@ -3,20 +3,7 @@
 
 #include <stdint.h>
 #include "bytecode.h"
-
-enum SL_opcode
-{
-	OP_PUSH	= 0,
-	OP_ADD,
-	OP_SUB,
-	OP_MUL,
-	OP_DIV,
-	OP_ASSIGN,
-	OP_PUSH_VAR,
-	__OP_COUNT__
-};
-
-typedef enum SL_opcode SL_opcode;
+#include "op.h"
 
 #define SL_STACK_CAPACITY 512
 
@@ -40,7 +27,6 @@ void SL_vm_print_vars(SL_vm *vm);
 SL_opcode SL_vm_read_opcode(SL_vm *vm);
 uint64_t SL_vm_read_u64(SL_vm *vm);
 char *SL_vm_read_str(SL_vm *vm);
-
 
 // Stack manipulation
 void SL_vm_stack_push(SL_vm *vm, uint64_t u);

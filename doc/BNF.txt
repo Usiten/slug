@@ -8,6 +8,6 @@
 <term_op>	::=		"+" | "-"
 <expr>		::=		<term> (<term_op> <term>)*	
 <assign>	::=		<identifier> "=" <expr>
-<linear>	::=		"=" <expr> ";"
-<stmts>		::=		<assign> ";"  (<assign> ";")*
+<linear>	::=		"=" <expr> 
+<stmts>		::=		(<assign> | <linear>) ";"  ((<assign> | <linear>) ";")*
 <program>	::=		<stmts>

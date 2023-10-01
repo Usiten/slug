@@ -40,7 +40,9 @@ void SL_load_source_from_sl_file(char *file_name, char **buffer)
 	fseek(f, 0L, SEEK_END);
 	size_t file_len = ftell(f);
 	fseek(f, 0L, SEEK_SET);	
-	*buffer = calloc(file_len, sizeof(char));
+
+	*buffer = calloc(file_len + 1, sizeof(char));
+	(*buffer)[file_len] = '\0';
 	fread(*buffer, sizeof(char), file_len, f);
 	fclose(f);
 }
@@ -66,8 +68,10 @@ void SL_compile(char *input, char *output)
 { 
 	char *buffer;
 	SL_load_source_from_sl_file(input, &buffer);
+	char * start = buffer;
 	SL_token *token = SL_next_token_from_input(&buffer); 
 	SL_token *first = token;
+	SL_token *head = token;
 	while (token->type != TOKEN_EOF)
 	{
 		token->file = input;
@@ -77,7 +81,11 @@ void SL_compile(char *input, char *output)
 	SL_parser_node *root = SL_parser_parse(&first);
 	SL_bytecode *bc = SL_bytecode_new();
 	SL_parser_node_to_bytecode(bc, root);
+	SL_parser_free_all_nodes();
+	SL_token_free(&head);
+	free(start);
 	SL_bytecode_dump(bc, output);
+	SL_bytecode_free(&bc);
 }
 
 void SL_execute(char *input) 
@@ -93,9 +101,10 @@ void SL_run(char *input)
 {
 	char *buffer;
 	SL_load_source_from_sl_file(input, &buffer);
-
+	char * start = buffer;
 	SL_token *token = SL_next_token_from_input(&buffer); 
 	SL_token *first = token;
+	SL_token *head = token;
 	while (token->type != TOKEN_EOF)
 	{
 		token->file = input;
@@ -104,15 +113,14 @@ void SL_run(char *input)
 	}
 
 	// SL_token_print_list(first);
-
 	SL_parser_node *root = SL_parser_parse(&first);
 	SL_bytecode *bc = SL_bytecode_new();
-
 	// SL_parser_print_nodes(root, 0);
-
 	SL_parser_node_to_bytecode(bc, root);
+	SL_parser_free_all_nodes();
+	SL_token_free(&head);
+	free(start);
 	// SL_bytecode_print(bc);
-	
 	SL_vm *vm = SL_vm_new(bc);
 	SL_vm_execute(vm);
 	SL_vm_print_stack(vm);

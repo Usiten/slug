@@ -1,7 +1,7 @@
 #include <assert.h>
 #include "bytecode.h"
 #include "parser.h"
-#include "vm.h"
+#include "op.h"
 #include "gen.h"
 
 void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
@@ -18,7 +18,7 @@ void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 	}
 
 	if (root->token->type == TOKEN_IDENTIFIER) {
-		if (!root->rhs) {
+		if (!root->is_rhs) {
 			SL_bytecode_write_str(bc, root->token->raw_text);
 		} else {
 			SL_bytecode_write_u8(bc, OP_PUSH_VAR);

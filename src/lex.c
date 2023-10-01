@@ -19,19 +19,33 @@ SL_token *SL_token_new(SL_token_type type, char *type_as_string, char* raw_text,
 	return token;
 }
 
+void SL_token_free(SL_token **token)
+{
+	if ((*token)->next != NULL)
+		SL_token_free(&((*token)->next));
+
+	if ((*token)->type == TOKEN_IDENTIFIER || (*token)->type == TOKEN_INTEGER) { // Both points to an strdup of the original source
+		free((*token)->raw_text);
+		(*token)->raw_text = NULL;
+	}
+
+	free(*token);
+	*token = NULL;
+}
+
 SL_token *SL_next_token_from_input(char **input)
 {
 	static_assert(12 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
 
 	SL_token *token = NULL;
-	static size_t column = 0;
-	static size_t line = 0;
+	static size_t column = 1;
+	static size_t line = 1;
 
 	while (isspace(**input)) {
 		column++;
 
 		if (**input == '\n') {
-			column = 0;
+			column = 1;
 			line++;
 		}
 

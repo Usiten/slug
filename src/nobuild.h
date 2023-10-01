@@ -928,7 +928,7 @@ int nob_needs_rebuild(const char *output_path, const char **input_paths, size_t 
 
 bool nob_rename(const char *old_path, const char *new_path)
 {
-    return true; // Shitty hack, I don't want a nobuild.old remaining and I don't want to make cleaning it part of the build process
+    return true; // HACK: I don't want a nobuild.old remaining and I don't want to make cleaning it part of the build process
     nob_log(NOB_INFO, "renaming %s -> %s", old_path, new_path);
 #ifdef _WIN32
     if (!MoveFileEx(old_path, new_path, MOVEFILE_REPLACE_EXISTING)) {

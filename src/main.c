@@ -5,6 +5,5 @@
 int main(int argc, char **argv)
 {
 	SL_cli_handle(argc, argv);
-
 	return 0;
 }

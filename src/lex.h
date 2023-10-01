@@ -41,7 +41,10 @@ struct SL_token
 typedef struct SL_token SL_token;
 
 SL_token *SL_token_new(SL_token_type type, char *type_as_string, char* raw_text, size_t line_no, size_t column_no);
-#define SL_TOKEN_NEW(type, raw_text) SL_token_new(type, #type, raw_text, line+1, column+1)
+#define SL_TOKEN_NEW(type, raw_text) SL_token_new(type, #type, raw_text, line, column)
+
+void SL_token_free(SL_token **token);
+
 
 SL_token *SL_next_token_from_input(char **input);
 void SL_token_print_list(SL_token *token);

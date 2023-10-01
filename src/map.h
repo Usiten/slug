@@ -16,12 +16,15 @@ typedef struct SL_key_value_pair SL_key_value_pair;
 
 struct SL_hash_map {
     struct SL_key_value_pair *table[TABLE_SIZE];
+    char **keys;
+    size_t key_count;
 };
 
 typedef struct SL_hash_map SL_hash_map;
 
 uint64_t SL_hash(char* key);
 SL_hash_map *SL_hash_map_new(void);
+void SL_hash_map_free(SL_hash_map **map);
 void SL_hash_map_insert(SL_hash_map *map, char *key, uint64_t value);
 uint64_t *SL_hash_map_get(SL_hash_map *map, char *key);
 

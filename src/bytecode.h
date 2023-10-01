@@ -12,6 +12,9 @@ struct SL_bytecode
 {
 	uint8_t		*code;
 	size_t		size;
+
+	char **str_registar;
+	size_t str_count;
 };
 
 typedef struct SL_bytecode SL_bytecode;
