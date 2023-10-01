@@ -4,7 +4,7 @@ A (very early toy) bytecode assembler and interpreter.
 As of today, it is not event turing complete.
 For now, it doesn't do anything fancy except some very basic math.
 
-It is highly **un**optimized, and leaks memory all over the place.
+It is highly **un**optimized.
 
 ## Build
 slug uses a [rewrite](https://github.com/tsoding/musializer/blob/master/src/nob.h) of [tsoding's nobuild](https://github.com/tsoding/nobuild) as a build tool. 
@@ -33,9 +33,15 @@ For more command, you can always just display the usage:
 ```sh
 $ ./slug
 Usage:
-    -c, --compile  `file.sl` [`out.slx`]   Compile `file.sl` to bytecode assembly `file.slx` (or `out.slx` if provided)
-    -x, --execute  `file.slx`              Execute bytecode assembly `file.slx`
-    -r, --run  `file.sl`                   Compile and execute `file.sl` without generating bytecode assembly
+    [...]
 ```
 
 Expect lot of crashes and errors.
+
+## Tests
+Requires python3
+```sh
+$ cd tests
+$ python3 test.py
+```
+Ultimately, I plan to add tests to nobuild, as I want all the toolchain to be C, but for now this will do just fine.

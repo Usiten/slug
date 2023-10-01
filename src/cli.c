@@ -12,14 +12,16 @@ enum USAGE {
 	TITLE = 0,
 	COMPILE,
 	EXECUTE,
-	RUN
+	RUN,
+	RUN_N_DUMP
 };
 
 static const char *usage[] = {
-	[TITLE] 	= "Usage:\n",
-	[COMPILE] 	= "    -c, --compile  `file.sl` [`out.slx`]   Compile `file.sl` to bytecode assembly `file.slx` (or `out.slx` if provided)\n",
-	[EXECUTE] 	= "    -x, --execute  `file.slx`              Execute bytecode assembly `file.slx`\n",
-	[RUN] 		= "    -r, --run  `file.sl`                   Compile and execute `file.sl` without generating bytecode assembly\n",
+	[TITLE] 		= "Usage:\n",
+	[COMPILE] 		= "    -c, --compile  `file.sl` [`out.slx`]   Compile `file.sl` to bytecode assembly `file.slx` (or `out.slx` if provided)\n",
+	[EXECUTE] 		= "    -x, --execute  `file.slx`              Execute bytecode assembly `file.slx`\n",
+	[RUN] 			= "    -r, --run  `file.sl`                   Compile and execute `file.sl` without generating bytecode assembly\n",
+	[RUN_N_DUMP] 	= "    -R, --run-n-dump  `file.sl`            Compile and execute `file.sl` without generating bytecode assembly, and dump stack and vars to stdout\n",
 	NULL,
 };
 
@@ -123,10 +125,40 @@ void SL_run(char *input)
 	// SL_bytecode_print(bc);
 	SL_vm *vm = SL_vm_new(bc);
 	SL_vm_execute(vm);
+	SL_vm_free(&vm);
+}
+
+void SL_run_n_dump(char *input)
+{
+	char *buffer;
+	SL_load_source_from_sl_file(input, &buffer);
+	char * start = buffer;
+	SL_token *token = SL_next_token_from_input(&buffer); 
+	SL_token *first = token;
+	SL_token *head = token;
+	while (token->type != TOKEN_EOF)
+	{
+		token->file = input;
+		token->next = SL_next_token_from_input(&buffer);
+		token = token->next;
+	}
+
+	// SL_token_print_list(first);
+	SL_parser_node *root = SL_parser_parse(&first);
+	SL_bytecode *bc = SL_bytecode_new();
+	// SL_parser_print_nodes(root, 0);
+	SL_parser_node_to_bytecode(bc, root);
+	SL_parser_free_all_nodes();
+	SL_token_free(&head);
+	free(start);
+	// SL_bytecode_print(bc);
+	SL_vm *vm = SL_vm_new(bc);
+	SL_vm_execute(vm);
 	SL_vm_print_stack(vm);
 	SL_vm_print_vars(vm);
 	SL_vm_free(&vm);
 }
+
 
 int SL_cli_handle(int argc, char** argv)
 {
@@ -177,6 +209,14 @@ int SL_cli_handle(int argc, char** argv)
         }
 
 		SL_run(argv[1]);
+    } 
+	else if (strcmp(command, "-R") == 0 || strcmp(command, "--run-n-dump") == 0) {
+        if (argc < 2) {
+            fprintf(stderr, "[ERROR] Missing argument\n%s%s", usage[TITLE], usage[RUN_N_DUMP]);
+            exit(1);
+        }
+
+		SL_run_n_dump(argv[1]);
     } 
 	else {
         fprintf(stderr, "[ERROR] Unknown command: %s\n", command);

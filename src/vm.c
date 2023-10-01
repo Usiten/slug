@@ -104,7 +104,7 @@ void SL_vm_print_stack(SL_vm *vm)
 
 	printf("-- Stack Top --\n");
 	for (long i = vm->sp - 1; i >= 0 ; --i) {
-		fprintf(stdout, "%s   %lu\n", 
+		fprintf(stdout, "%s%lu\n", 
 			i == vm->sp - 1 
 				? ">" 
 				: " ",
@@ -115,16 +115,15 @@ void SL_vm_print_stack(SL_vm *vm)
 
 void SL_vm_print_vars(SL_vm *vm)
 {
-	(void) vm;
-	// assert(vm != NULL);
-	// assert(vm->bytecode != NULL);
+	printf("-- Var Data --\n");
+	for (size_t i = 0; i < vm->var_to_addr->key_count; ++i)
+	{
+		char *key = vm->var_to_addr->keys[i];
+		uint64_t *value = SL_hash_map_get(vm->var_to_addr, key);
 
-	// printf("-- Var Data --\n");
-	// for (size_t i = 0; i < vm->var_count; ++i) {
-	// 	printf("0x%02X  : %llu\n", i, vm->var_data[i]);
-	// }
-
-	// printf("---------------\n");
+		fprintf(stdout, "%s: %llu\n", key, *value);
+	}
+	printf("---------------\n");
 }
 
 void SL_vm_execute(SL_vm *vm)
@@ -182,10 +181,8 @@ void SL_vm_execute(SL_vm *vm)
 
 			if (vaddr) {
 				*vaddr = value;
-				printf("FOUND : varn: %s, vaddr: %llu\n", varn, *vaddr);
 			} else {
 				SL_hash_map_insert(vm->var_to_addr, varn, value);
-				printf("CREAT : varn: %s, vaddr: %llu\n", varn, value);
 			}
 			continue;
 		}
@@ -195,7 +192,6 @@ void SL_vm_execute(SL_vm *vm)
 			uint64_t *vaddr = SL_hash_map_get(vm->var_to_addr, varn);
 			if (vaddr) {
 				SL_vm_stack_push(vm, *vaddr);
-				printf("PUSHS : varn: %s, vaddr: %llu\n", varn, *vaddr);
 			} else {
 				fprintf(stderr, "[ERROR] Use of undeclared variable '%s'\n", varn);
 				exit(1);
