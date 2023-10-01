@@ -18,7 +18,8 @@ $ ./nobuild		# Build `slug`
 $ ./nobuild clean   	# Clean `slug`
 $ ./nobuild re      	# Clean and rebuild
 ```
-There is no Windows port, but it should be pretty easy to port with [MinGW-w64](https://www.mingw-w64.org/).
+~~There is no Windows port, but it should be pretty easy to port with [MinGW-w64](https://www.mingw-w64.org/).~~
+It also work on windows, you just need to have `gcc` available
 
 ## How to use
 ```sh

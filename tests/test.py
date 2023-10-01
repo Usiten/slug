@@ -3,14 +3,11 @@ import sys
 import subprocess
 import filecmp
 
-def red(skk):
-	print("\033[91m {}\033[00m" .format(skk), end='')
-
-def green(skk):
-	print("\033[92m {}\033[00m" .format(skk), end='')
-
 def run_tests(file):
-	command = f"../slug -R {file}"
+	if sys.platform.lower() in ['win32']:
+		command = f"..\slug.exe -R {file}"
+	else:
+		command = f"../slug -R {file}"
 
 	try:
 		output = subprocess.check_output(command, shell=True, universal_newlines=True)
@@ -28,10 +25,10 @@ def run_tests(file):
 		expected_output = f.read()
 
 	if expected_output == output:
-		green(f".")
+		print(f".", end='')
 		return 0
 	else:
-		red(f"x")
+		print(f".", end='')
 		return file
 
 if __name__ == "__main__":
@@ -47,6 +44,6 @@ if __name__ == "__main__":
 	print("\n")
 
 	if (len(err)):
-		red(f"Test failed on: {','.join(err)}\n")
+		print(f"Test failed on: {','.join(err)}")
 	else:
-		green('All tests passed!~\n')
+		print('All tests passed!~')

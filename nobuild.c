@@ -3,12 +3,12 @@
 
 #define OUT_BIN "slug"
 #define SOURCE_FILES "src/main.c", "src/bytecode.c", "src/lex.c", "src/parser.c", "src/vm.c", "src/gen.c", "src/tool.c", "src/cli.c", "src/map.c"
-#define CFLAGS "-Wall", "-Wextra", "-O0", "-std=c11", "-Wformat=0", "-g", "-fsanitize=address"
+#define CFLAGS "-Wall", "-Wextra", "-O0", "-std=c11", "-Wformat=0"
 
 static void build(void)
 {
 	Nob_Cmd cmd = {0};
-	nob_cmd_append(&cmd, "cc", CFLAGS, "-o", OUT_BIN, SOURCE_FILES);
+	nob_cmd_append(&cmd, "gcc", CFLAGS, "-o", OUT_BIN, SOURCE_FILES);
 	nob_cmd_run_sync(cmd);
 }
 
