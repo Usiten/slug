@@ -45,5 +45,7 @@ if __name__ == "__main__":
 
 	if (len(err)):
 		print(f"Test failed on: {','.join(err)}")
+		exit(1)
 	else:
 		print('All tests passed!~')
+		exit(0)
