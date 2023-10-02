@@ -10,7 +10,7 @@ static size_t registar_count = 0;
 
 SL_parser_node *terminal(SL_token **token, SL_token_type expected_type)
 {
-	static_assert(13 == __TOKEN_TYPE_COUNT__, "Ensure we don't forget to implement parser for a new token"); 
+	static_assert(16 == __TOKEN_TYPE_COUNT__, "Ensure we don't forget to implement parser for a new token"); 
 
 	SL_parser_node *node = calloc(1, sizeof(SL_parser_node));
 	SL_ALLOC_CHECK(node)
@@ -50,10 +50,13 @@ TERMINAL(multiply, 		TOKEN_MULTIPLY)
 TERMINAL(divide, 		TOKEN_DIVIDE)
 TERMINAL(lparen, 		TOKEN_LPAREN)
 TERMINAL(rparen, 		TOKEN_RPAREN)
+TERMINAL(lbracket, 		TOKEN_LBRACKET)
+TERMINAL(rbracket, 		TOKEN_RBRACKET)
 TERMINAL(assign, 		TOKEN_ASSIGN)
 TERMINAL(identifier, 	TOKEN_IDENTIFIER)
 TERMINAL(semicolon, 	TOKEN_SEMICOLON)
 TERMINAL(less_than, 	TOKEN_LESS_THAN)
+TERMINAL(iff, 			TOKEN_IF)
 
 SL_parser_node *SL_parser_node_new(SL_token *token, SL_parser_node *left, SL_parser_node *right)
 {
@@ -84,6 +87,7 @@ SL_parser_node *SL_parse_comp_op(SL_token **token)
 SL_parser_node *SL_parse_factor(SL_token **token)
 {
 	SL_token *save = *token;
+
 	SL_parser_node *integer = terminal_integer(token);
 	if (integer && !integer->is_unexpected)
 		return integer;
@@ -204,6 +208,78 @@ SL_parser_node *SL_parse_comp(SL_token **token)
 	return expr1;
 }
 
+SL_parser_node *SL_parse_expr_of_if(SL_token **token)
+{
+	SL_token *save = *token;
+	SL_parser_node *expr1 = SL_parse_expr(token);
+	if (expr1 && !expr1->is_unexpected)
+		return expr1;
+	
+	*token = save;
+	SL_parser_node *iff = SL_parse_if(token);
+	if (iff && !iff->is_unexpected)
+		return iff;
+
+	return NULL;
+}
+
+SL_parser_node *SL_parse_exprs(SL_token **token)
+{
+	SL_parser_node *expr1 = SL_parse_expr_of_if(token);
+	if (!expr1 || expr1->is_unexpected)
+		return NULL;
+	
+	while (*token && ((*token)->type == TOKEN_SEMICOLON))
+	{
+		SL_parser_node *semi = terminal_semicolon(token);
+		if (!semi)
+			return NULL;
+
+		SL_parser_node *expr2 = SL_parse_exprs(token);
+		if (!expr2)
+			return NULL;
+
+		expr1 = SL_parser_node_new(NULL, expr1, expr2);
+	}
+
+	return expr1;
+}
+
+SL_parser_node *SL_parse_if(SL_token **token)
+{
+	SL_parser_node *iff = terminal_iff(token);
+	if (!iff || iff->is_unexpected)
+		return NULL;
+
+	SL_parser_node *lparen = terminal_lparen(token);
+	if (!lparen || lparen->is_unexpected)
+		return NULL;
+
+	SL_parser_node *comp = SL_parse_comp(token);
+	if (!comp || comp->is_unexpected) 
+		return NULL;
+
+	SL_parser_node *rparen = terminal_rparen(token);
+	if (!rparen || rparen->is_unexpected)
+		return NULL;
+
+	SL_parser_node *lbracket = terminal_lbracket(token);
+	if (!lbracket || lbracket->is_unexpected)
+		return NULL;
+
+	SL_parser_node *exprs = SL_parse_exprs(token);
+	if (!exprs || exprs->is_unexpected)
+		return NULL;
+	
+	SL_parser_node *rbracket = terminal_rbracket(token);
+	if (!rbracket || rbracket->is_unexpected)
+		return NULL;
+
+	iff->left = comp;
+	iff->right = exprs;
+	return iff;
+}
+
 SL_parser_node *SL_parse_assign(SL_token **token)
 {
 	SL_parser_node *id = terminal_identifier(token);
@@ -213,14 +289,25 @@ SL_parser_node *SL_parse_assign(SL_token **token)
 	SL_parser_node *assign = terminal_assign(token);
 	if (!assign || assign->is_unexpected)
 		return NULL;
-	
+
+	SL_token *save = *token;
+	SL_parser_node *iff1 = SL_parse_if(token);
+	if (iff1 && !iff1->is_unexpected)
+	{
+		assign->left = id;
+		assign->right = iff1;
+		return assign;
+	}
+
+	*token = save;
 	SL_parser_node *comp = SL_parse_comp(token);
-	if (!comp)
-		return NULL;
+	if (comp && !comp->is_unexpected) {
+		assign->left = id;
+		assign->right = comp;
+		return assign;
+	}
 	
-	assign->left = id;
-	assign->right = comp;
-	return assign;
+	return NULL;
 }
 
 SL_parser_node *SL_parse_linear(SL_token **token)
@@ -229,15 +316,15 @@ SL_parser_node *SL_parse_linear(SL_token **token)
 	if (!assign || assign->is_unexpected)
 		return NULL;
 
-	// SL_token *save = *token;
-	// SL_parser_node *comp = SL_parse_comp(token);
-	// if (comp && !comp->is_unexpected)
-	// 	return comp;
-
-	// *token = save;
+	SL_token *save = *token;
 	SL_parser_node *comp1 = SL_parse_comp(token);
 	if (comp1 && !comp1->is_unexpected)
 		return comp1;
+
+	*token = save;
+	SL_parser_node *iff1 = SL_parse_if(token);
+	if (iff1 && !iff1->is_unexpected)
+		return iff1;
 
 	return NULL;
 }

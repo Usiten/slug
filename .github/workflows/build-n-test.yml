@@ -17,10 +17,9 @@ jobs:
       run: |
         cc -o nobuild nobuild.c
         ./nobuild
-      working-directory: .  # Replace with the path to your C code
+      working-directory: . 
 
     - name: Test
       run: |
-        cd tests
-        python3 test.py
+        python3 run_tests.py
       working-directory: . 

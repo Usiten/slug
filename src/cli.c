@@ -151,7 +151,7 @@ void SL_run_n_dump(char *input)
 	SL_parser_free_all_nodes();
 	SL_token_free(&head);
 	free(start);
-	// SL_bytecode_print(bc);
+	//SL_bytecode_print(bc);
 	SL_vm *vm = SL_vm_new(bc);
 	SL_vm_execute(vm);
 	SL_vm_print_stack(vm);

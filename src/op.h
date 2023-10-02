@@ -11,6 +11,8 @@ enum SL_opcode
 	OP_LESS_THAN,
 	OP_ASSIGN,
 	OP_PUSH_VAR,
+	OP_IF,
+	OP_END_IF,
 	__OP_COUNT__
 };
 

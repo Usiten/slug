@@ -24,7 +24,8 @@ void SL_token_free(SL_token **token)
 	if ((*token)->next != NULL)
 		SL_token_free(&((*token)->next));
 
-	if ((*token)->type == TOKEN_IDENTIFIER || (*token)->type == TOKEN_INTEGER) { // Both points to an strdup of the original source
+	if ((*token)->type == TOKEN_IDENTIFIER || (*token)->type == TOKEN_INTEGER || (*token)->type == TOKEN_IF) 
+	{ // Both points to an strdup of the original source
 		free((*token)->raw_text);
 		(*token)->raw_text = NULL;
 	}
@@ -35,7 +36,7 @@ void SL_token_free(SL_token **token)
 
 SL_token *SL_next_token_from_input(char **input)
 {
-	static_assert(13 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
+	static_assert(16 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
 
 	SL_token *token = NULL;
 	static size_t column = 1;
@@ -97,6 +98,20 @@ SL_token *SL_next_token_from_input(char **input)
 		return token;
     }
 
+	if (**input == '{') {
+        token = SL_TOKEN_NEW(TOKEN_LBRACKET, "{");
+        (*input)++;
+		column++;
+		return token;
+    }
+
+	if (**input == '}') {
+        token = SL_TOKEN_NEW(TOKEN_RBRACKET, "}");
+        (*input)++;
+		column++;
+		return token;
+    }
+
 	if (**input == ';') {
         token = SL_TOKEN_NEW(TOKEN_SEMICOLON, ";");
         (*input)++;
@@ -139,7 +154,12 @@ SL_token *SL_next_token_from_input(char **input)
 			(*input)++;
 		}
 
-		token = SL_TOKEN_NEW(TOKEN_IDENTIFIER, SL_strndup(start, *input - start));
+		char *text = SL_strndup(start, *input - start);
+		SL_token_type type = TOKEN_IDENTIFIER;
+
+		if (strcmp(text, "if") == 0) type = TOKEN_IF;
+
+		token = SL_TOKEN_NEW(type, text);
 		column += *input - start;
 		return token;
 	}

@@ -2,13 +2,14 @@
 
 <program>	::=		<stmts>
 <stmts>		::=		(<assign> | <linear>) ";"  ((<assign> | <linear>) ";")*
-<assign>	::=		<identifier> "=" <comparison>
-<linear>	::=		"=" <comparison> 
+<assign>	::=		<identifier> "=" (<comparison> | <if>) 
+<linear>	::=		"=" (<comparison> | <if>) 
 <comparison> ::= 	<expr> (<comp_op> <expr>)?
 <expr>		::=		<term> (<term_op> <term>)*
 <term>		::=		<factor> (<factor_op> <factor>)*
 <factor>	::=		<integer> | <identifier> | "(" <expr> ")"
-
+<if> 		::=		"if" "(" <comparison> ")" "{" <exprs> "}" 
+<exprs>		::=		(<expr> | <if>) (";" <exprs>)*
 <factor_op>	::=		"*" | "/"
 <term_op>	::=		"+" | "-"
 <comp_op>	::=		"<"
