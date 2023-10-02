@@ -1,7 +1,12 @@
 #define NOB_IMPLEMENTATION
 #include "src/nobuild.h"
 
-#define OUT_BIN "slug"
+#ifdef _WIN32
+#  define OUT_BIN "slug.exe"
+#else
+#  define OUT_BIN "slug"
+#endif
+
 #define SOURCE_FILES "src/main.c", "src/bytecode.c", "src/lex.c", "src/parser.c", "src/vm.c", "src/gen.c", "src/tool.c", "src/cli.c", "src/map.c"
 #define CFLAGS "-Wall", "-Wextra", "-O0", "-std=c11", "-Wformat=0"
 
@@ -15,7 +20,11 @@ static void build(void)
 static void clean(void)
 {
 	Nob_Cmd cmd = {0};
-	nob_cmd_append(&cmd, "rm", "-f", OUT_BIN);
+#ifdef _WIN32
+	nob_cmd_append(&cmd, "del", OUT_BIN);
+#else
+	nob_cmd_append(&cmd, "rm", OUT_BIN);
+#endif
 	nob_cmd_run_sync(cmd);
 }
 
