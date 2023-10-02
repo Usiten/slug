@@ -55,6 +55,26 @@ void SL_bytecode_write_u64(SL_bytecode *bc, uint64_t u)
 	SL_bytecode_write_u8(bc, (u & 0xFF) >> 0 * 8);
 }
 
+void SL_bytecode_write_u8_at_addr(SL_bytecode *bc, uint8_t u, uint64_t addr)
+{
+	assert(bc != NULL);
+	assert(bc->size > addr);
+
+	bc->code[addr] = u;
+}
+
+void SL_bytecode_write_u64_at_addr(SL_bytecode *bc, uint64_t u, uint64_t addr)
+{
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF00000000000000) >> 7 * 8, addr + 0);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF000000000000) >> 6 * 8, addr + 1);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF0000000000) >> 5 * 8, addr + 2);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF00000000) >> 4 * 8, addr + 3);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF000000) >> 3 * 8, addr + 4);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF0000) >> 2 * 8, addr + 5);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF00) >> 1 * 8, addr + 6);
+	SL_bytecode_write_u8_at_addr(bc, (u & 0xFF) >> 0 * 8, addr + 7);
+}
+
 void SL_bytecode_write_str(SL_bytecode *bc, char *str)
 {
 	assert(bc != NULL);

@@ -132,7 +132,7 @@ void SL_vm_execute(SL_vm *vm)
 	assert(vm->stack != NULL);
 	assert(vm->bytecode != NULL);
 
-	static_assert(10 == __OP_COUNT__, "Not all opcode are implemented"); // If this assertion fail, implement the missing operation and increment it
+	static_assert(9 == __OP_COUNT__, "Not all opcode are implemented"); // If this assertion fail, implement the missing operation and increment it
 
 	while ((size_t)vm->ip < vm->bytecode->size)
 	{
@@ -180,26 +180,13 @@ void SL_vm_execute(SL_vm *vm)
 			continue;
 		}
 
-		if (opcode == OP_IF)
+		if (opcode == OP_JUMP_IF_ZERO)
 		{
 			uint64_t u = SL_vm_stack_pop(vm);
+			uint64_t addr = SL_vm_read_u64(vm);
 			if (u == 0) {
-				size_t iff_count = 1;
-				while (1) {
-					opcode = SL_vm_read_opcode(vm);
-					if (opcode == OP_IF) iff_count++;
-					if (opcode == OP_END_IF) { 
-						iff_count--;
-						if (iff_count == 0) {
-							break;
-						}
-					}
-				}
+				vm->ip = addr;
 			}
-			continue;
-		}
-
-		if (opcode == OP_END_IF) {
 			continue;
 		}
 

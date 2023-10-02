@@ -4,10 +4,11 @@
 #include "op.h"
 #include "gen.h"
 
-void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
+
+void SL_parser_node_to_bytecode_impl(SL_bytecode *bc, SL_parser_node *root)
 {
 	static_assert(16 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
-	static_assert(10 == __OP_COUNT__);
+	static_assert(9 == __OP_COUNT__);
 
 	assert(bc != NULL);
 	assert(root != NULL);
@@ -29,11 +30,12 @@ void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 	}
 
 	if (root->token->type == TOKEN_IF) {
-		// TODO: Pop all value pushed while into the if scope. So yeah, handle scopes...
 		SL_parser_node_to_bytecode(bc, root->left); // comparison
-		SL_bytecode_write_u8(bc, OP_IF);
+		SL_bytecode_write_u8(bc, OP_JUMP_IF_ZERO);
+		uint64_t placeholder_position = bc->size;
+		SL_bytecode_write_u64(bc, UINT64_MAX);
 		SL_parser_node_to_bytecode(bc, root->right); // Body
-		SL_bytecode_write_u8(bc, OP_END_IF); // END IF ? 
+		SL_bytecode_write_u64_at_addr(bc, bc->size, placeholder_position);
 		return;
 	}
 
@@ -78,4 +80,9 @@ void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 		SL_bytecode_write_u8(bc, OP_LESS_THAN);
 		return;
 	}
+}
+
+void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
+{
+	SL_parser_node_to_bytecode_impl(bc, root);
 }

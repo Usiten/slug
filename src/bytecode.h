@@ -25,6 +25,8 @@ void SL_bytecode_free(SL_bytecode **sl);
 // Write
 void SL_bytecode_write_u8(SL_bytecode *bc, uint8_t u);
 void SL_bytecode_write_u64(SL_bytecode *bc, uint64_t u);
+void SL_bytecode_write_u8_at_addr(SL_bytecode *bc, uint8_t u, uint64_t addr);
+void SL_bytecode_write_u64_at_addr(SL_bytecode *bc, uint64_t u, uint64_t addr);
 void SL_bytecode_write_str(SL_bytecode *bc, char *str);
 
 // Read
