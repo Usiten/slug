@@ -42,7 +42,7 @@ return token;
 
 SL_token *SL_next_token_from_input(char **input)
 {
-	static_assert(16 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
+	static_assert(17 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
 
 	SL_token *token = NULL;
 	static size_t column = 1;

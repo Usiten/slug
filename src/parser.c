@@ -10,7 +10,7 @@ static size_t registar_count = 0;
 
 SL_parser_node *terminal(SL_token **token, SL_token_type expected_type)
 {
-	static_assert(16 == __TOKEN_TYPE_COUNT__, "Ensure we don't forget to implement parser for a new token"); 
+	static_assert(17 == __TOKEN_TYPE_COUNT__, "Ensure we don't forget to implement parser for a new token"); 
 
 	SL_parser_node *node = calloc(1, sizeof(SL_parser_node));
 	SL_ALLOC_CHECK(node)
@@ -69,7 +69,6 @@ SL_parser_node *SL_parser_node_new(SL_token *token, SL_parser_node *left, SL_par
 
 	node->token = token;
 	node->is_unexpected = false;
-	node->is_rhs = false;
 	node->left = left;
 	node->right = right;
 	return node;
@@ -98,10 +97,11 @@ SL_parser_node *SL_parse_factor(SL_token **token)
 	OK(integer, terminal_integer);
 
 	*token = save;
-	// TODO: Special case, for now keep it that way, we'll see later when semantic analysis exist
+	// TODO: Handle this special case better
 	SL_parser_node *id = SL_parse_terminal_identifier(token);
 	if (id && !id->is_unexpected) {
-		id->is_rhs = true;
+		id->token->type = TOKEN_IDENTIFIER_VALUE;
+		id->token->type_as_string = "TOKEN_IDENTIFIER_VALUE";
 		return id;
 	}
 

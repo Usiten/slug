@@ -7,7 +7,7 @@
 
 void SL_parser_node_to_bytecode_impl(SL_bytecode *bc, SL_parser_node *root)
 {
-	static_assert(16 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
+	static_assert(17 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
 	static_assert(9 == __OP_COUNT__);
 
 	assert(bc != NULL);
@@ -20,12 +20,13 @@ void SL_parser_node_to_bytecode_impl(SL_bytecode *bc, SL_parser_node *root)
 	}
 
 	if (root->token->type == TOKEN_IDENTIFIER) {
-		if (!root->is_rhs) {
-			SL_bytecode_write_str(bc, root->token->raw_text);
-		} else {
-			SL_bytecode_write_u8(bc, OP_PUSH_VAR);
-			SL_bytecode_write_str(bc, root->token->raw_text);
-		}
+		SL_bytecode_write_str(bc, root->token->raw_text);
+		return;
+	}
+
+	if (root->token->type == TOKEN_IDENTIFIER_VALUE) {
+		SL_bytecode_write_u8(bc, OP_PUSH_VAR);
+		SL_bytecode_write_str(bc, root->token->raw_text);
 		return;
 	}
 
