@@ -34,6 +34,12 @@ void SL_token_free(SL_token **token)
 	*token = NULL;
 }
 
+#define MAKE_TOKEN(type, text)				\
+token = SL_TOKEN_NEW(type, text);			\
+(*input)++;									\
+column++;									\
+return token;								
+
 SL_token *SL_next_token_from_input(char **input)
 {
 	static_assert(16 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
@@ -71,80 +77,47 @@ SL_token *SL_next_token_from_input(char **input)
 	}
 
 	if (**input == '<') {
-        token = SL_TOKEN_NEW(TOKEN_LESS_THAN, "<");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_LESS_THAN, "<")
     }
 
 	if (**input == '=') {
-        token = SL_TOKEN_NEW(TOKEN_ASSIGN, "=");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_ASSIGN, "=")
     }
 
 	if (**input == '(') {
-        token = SL_TOKEN_NEW(TOKEN_LPAREN, "(");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_LPAREN, "(")
     }
 
 	if (**input == ')') {
-        token = SL_TOKEN_NEW(TOKEN_RPAREN, ")");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_RPAREN, ")")
     }
 
 	if (**input == '{') {
-        token = SL_TOKEN_NEW(TOKEN_LBRACKET, "{");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_LBRACKET, "{")
     }
 
 	if (**input == '}') {
-        token = SL_TOKEN_NEW(TOKEN_RBRACKET, "}");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_RBRACKET, "}")
     }
 
 	if (**input == ';') {
-        token = SL_TOKEN_NEW(TOKEN_SEMICOLON, ";");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_SEMICOLON, ";")
     }
 
 	if (**input == '+') {
-        token = SL_TOKEN_NEW(TOKEN_PLUS, "+");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_PLUS, "+")
     }
 
 	if (**input == '-') {
-        token = SL_TOKEN_NEW(TOKEN_MINUS, "-");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_MINUS, "-")
     }
 
 	if (**input == '*') {
-        token = SL_TOKEN_NEW(TOKEN_MULTIPLY, "*");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_MULTIPLY, "*")
     }
 
 	if (**input == '/') {
-        token = SL_TOKEN_NEW(TOKEN_DIVIDE, "/");
-        (*input)++;
-		column++;
-		return token;
+        MAKE_TOKEN(TOKEN_DIVIDE, "/")
     }
 
 	if (isalpha(**input) || **input == '_')	{
