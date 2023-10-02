@@ -8,6 +8,7 @@ enum SL_opcode
 	OP_SUB,
 	OP_MUL,
 	OP_DIV,
+	OP_LESS_THAN,
 	OP_ASSIGN,
 	OP_PUSH_VAR,
 	__OP_COUNT__

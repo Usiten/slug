@@ -6,7 +6,8 @@
 
 void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 {
-	static_assert(12 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
+	static_assert(13 == __TOKEN_TYPE_COUNT__); // If this assertion fail, implement the missing operation and increment it
+	static_assert(8 == __OP_COUNT__);
 
 	assert(bc != NULL);
 	assert(root != NULL);
@@ -61,6 +62,11 @@ void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 
 	if (root->token->type == TOKEN_DIVIDE) {
 		SL_bytecode_write_u8(bc, OP_DIV);
+		return;
+	}
+
+	if (root->token->type == TOKEN_LESS_THAN) {
+		SL_bytecode_write_u8(bc, OP_LESS_THAN);
 		return;
 	}
 }

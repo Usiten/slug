@@ -1,13 +1,17 @@
 -- You can play with this in https://bnfplayground.pauliankline.com/
 
-<identifier> ::=	([a-z] | [A-Z] | "_") ([a-z] | [A-Z] | [0-9] | "_")+
-<integer>	::=		[0-9]+
-<factor>	::=		<integer> | <identifier> | "(" <expr> ")"
-<factor_op>	::=		"*" | "/"
-<term>		::=		<factor> (<factor_op> <factor>)*
-<term_op>	::=		"+" | "-"
-<expr>		::=		<term> (<term_op> <term>)*	
+<program>	::=		<stmts>
+<stmts>		::=		(<assign> | <linear>) ";"  ((<assign> | <linear>) ";")*
 <assign>	::=		<identifier> "=" <expr>
 <linear>	::=		"=" <expr> 
-<stmts>		::=		(<assign> | <linear>) ";"  ((<assign> | <linear>) ";")*
-<program>	::=		<stmts>
+<comparison>::= 	<expr> <comp_op> <expr>
+<expr>		::=		<comparison> | <term> (<term_op> <term>)*		
+<term>		::=		<factor> (<factor_op> <factor>)*
+<factor>	::=		<integer> | <identifier> | "(" <expr> ")"
+
+<factor_op>	::=		"*" | "/"
+<term_op>	::=		"+" | "-"
+<comp_op>	::=		"<"
+
+<identifier> ::=	([a-z] | [A-Z] | "_") ([a-z] | [A-Z] | [0-9] | "_")+
+<integer>	::=		[0-9]+

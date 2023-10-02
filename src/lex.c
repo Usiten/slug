@@ -35,7 +35,7 @@ void SL_token_free(SL_token **token)
 
 SL_token *SL_next_token_from_input(char **input)
 {
-	static_assert(12 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
+	static_assert(13 == __TOKEN_TYPE_COUNT__, "Not all token type are hadled"); // If this assertion fail, implement the missing token and increment it
 
 	SL_token *token = NULL;
 	static size_t column = 1;
@@ -68,6 +68,13 @@ SL_token *SL_next_token_from_input(char **input)
 		column += *input - start;
 		return token;
 	}
+
+	if (**input == '<') {
+        token = SL_TOKEN_NEW(TOKEN_LESS_THAN, "<");
+        (*input)++;
+		column++;
+		return token;
+    }
 
 	if (**input == '=') {
         token = SL_TOKEN_NEW(TOKEN_ASSIGN, "=");
