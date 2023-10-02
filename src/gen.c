@@ -29,6 +29,7 @@ void SL_parser_node_to_bytecode(SL_bytecode *bc, SL_parser_node *root)
 	}
 
 	if (root->token->type == TOKEN_IF) {
+		// TODO: Pop all value pushed while into the if scope. So yeah, handle scopes...
 		SL_parser_node_to_bytecode(bc, root->left); // comparison
 		SL_bytecode_write_u8(bc, OP_IF);
 		SL_parser_node_to_bytecode(bc, root->right); // Body

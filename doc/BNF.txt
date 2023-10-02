@@ -2,7 +2,7 @@
 
 <program>	::=		<stmts>
 <stmts>		::=		(<assign> | <linear>) ";"  ((<assign> | <linear>) ";")*
-<assign>	::=		<identifier> "=" (<comparison> | <if>) 
+<assign>	::=		<identifier> "=" <comparison> 
 <linear>	::=		"=" (<comparison> | <if>) 
 <comparison> ::= 	<expr> (<comp_op> <expr>)?
 <expr>		::=		<term> (<term_op> <term>)*

@@ -290,24 +290,13 @@ SL_parser_node *SL_parse_assign(SL_token **token)
 	if (!assign || assign->is_unexpected)
 		return NULL;
 
-	SL_token *save = *token;
-	SL_parser_node *iff1 = SL_parse_if(token);
-	if (iff1 && !iff1->is_unexpected)
-	{
-		assign->left = id;
-		assign->right = iff1;
-		return assign;
-	}
-
-	*token = save;
 	SL_parser_node *comp = SL_parse_comp(token);
-	if (comp && !comp->is_unexpected) {
-		assign->left = id;
-		assign->right = comp;
-		return assign;
-	}
-	
-	return NULL;
+	if (!comp || comp->is_unexpected)
+		return NULL;
+		
+	assign->left = id;
+	assign->right = comp;
+	return assign;
 }
 
 SL_parser_node *SL_parse_linear(SL_token **token)
