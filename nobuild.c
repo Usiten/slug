@@ -25,9 +25,20 @@ static void re(void)
 	build();
 }
 
+static void test(void)
+{
+	Nob_Cmd cmd = {0};
+	#ifdef _WIN32
+		nob_cmd_append(&cmd, "python", "run_tests.py");
+	#else
+		nob_cmd_append(&cmd, "python3", "run_tests.py");
+	#endif
+	nob_cmd_run_sync(cmd);
+}
+
 int main(int argc, char **argv)
 {
-	NOB_GO_REBUILD_URSELF(argc, argv);
+	// NOB_GO_REBUILD_URSELF(argc, argv);
 	
 	const char *program = nob_shift_args(&argc, &argv);
 	const char *subcommand = NULL;
@@ -47,6 +58,9 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(subcommand, "re") == 0) {
 		re();
+	}
+	else if (strcmp(subcommand, "test") == 0) {
+		test();
 	}
 
 	return 0;
