@@ -21,9 +21,9 @@ static void clean(void)
 {
 	Nob_Cmd cmd = {0};
 #ifdef _WIN32
-	nob_cmd_append(&cmd, "del", OUT_BIN);
+	nob_cmd_append(&cmd, "del", "/Q", OUT_BIN);
 #else
-	nob_cmd_append(&cmd, "rm", OUT_BIN);
+	nob_cmd_append(&cmd, "rm", "-f", OUT_BIN);
 #endif
 	nob_cmd_run_sync(cmd);
 }
@@ -47,7 +47,9 @@ static void test(void)
 
 int main(int argc, char **argv)
 {
-	// NOB_GO_REBUILD_URSELF(argc, argv);
+	#ifndef _WIN32
+		NOB_GO_REBUILD_URSELF(argc, argv);
+	#endif
 	
 	const char *program = nob_shift_args(&argc, &argv);
 	const char *subcommand = NULL;
